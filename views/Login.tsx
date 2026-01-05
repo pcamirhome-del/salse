@@ -1,18 +1,16 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { User } from '../types';
 
 interface LoginProps {
-  onLogin: (user: User) => void;
+  onLogin: (username: string) => void;
   users: User[];
 }
 
 const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [displayName, setDisplayName] = useState('');
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [isFocused, setIsFocused] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -26,12 +24,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const user = users.find(u => u.username === username);
-    if (user) {
-      onLogin(user);
-    } else {
-      alert("بيانات الدخول غير صحيحة. جرب 'admin' أو 'ahmed'");
-    }
+    onLogin(username);
   };
 
   return (
@@ -55,8 +48,8 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 mb-4 border border-white/20">
             <i className="fas fa-lock text-white text-2xl"></i>
           </div>
-          <h2 className="text-3xl font-bold text-white tracking-tight">مرحباً بعودتك</h2>
-          <p className="text-white/60 mt-2">أدخل بياناتك للوصول إلى نظام لومينا</p>
+          <h2 className="text-3xl font-bold text-white tracking-tight">الدخول للنظام</h2>
+          <p className="text-white/60 mt-2">أدخل بياناتك للوصول إلى لومينا برو</p>
         </div>
 
         <form onSubmit={handleLoginSubmit} className="space-y-6">
@@ -70,24 +63,11 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
                 type="text" 
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
                 className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pr-12 pl-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:bg-white/10 transition-all placeholder:text-white/20 text-right"
-                placeholder="أدخل اسم المستخدم"
+                placeholder="اسم المستخدم"
                 required
               />
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-white/80 mr-1 block">اسم العرض (اختياري)</label>
-            <input 
-              type="text" 
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder:text-white/20 text-right"
-              placeholder="بماذا نلقبك؟"
-            />
           </div>
 
           <div className="space-y-2">
@@ -116,9 +96,9 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
         </form>
 
         <div className="mt-8 pt-6 border-t border-white/10 text-center">
-          <p className="text-white/40 text-sm">
-            تسجيل الدخول بالبصمة متاح. 
-            <button className="text-indigo-400 mr-1 hover:underline">استخدم بصمة الوجه</button>
+          <p className="text-white/40 text-sm italic">
+            <i className="fas fa-shield-alt ml-2"></i>
+            إنشاء الحسابات متاح فقط من خلال لوحة الإدارة
           </p>
         </div>
       </div>

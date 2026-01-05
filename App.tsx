@@ -18,65 +18,70 @@ const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeView, setActiveView] = useState<'dashboard' | 'sales' | 'admin' | 'crm' | 'chat'>('dashboard');
   
-  // App State
-  const [users, setUsers] = useState<User[]>(INITIAL_USERS);
-  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
-  const [branches, setBranches] = useState<Branch[]>(INITIAL_BRANCHES);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [markets, setMarkets] = useState<Market[]>(INITIAL_MARKETS);
+  // App State with LocalStorage persistence
+  const [users, setUsers] = useState<User[]>(() => {
+    const saved = localStorage.getItem('lumina_users');
+    return saved ? JSON.parse(saved) : INITIAL_USERS;
+  });
+  const [products, setProducts] = useState<Product[]>(() => {
+    const saved = localStorage.getItem('lumina_products');
+    return saved ? JSON.parse(saved) : INITIAL_PRODUCTS;
+  });
+  const [branches, setBranches] = useState<Branch[]>(() => {
+    const saved = localStorage.getItem('lumina_branches');
+    return saved ? JSON.parse(saved) : INITIAL_BRANCHES;
+  });
+  const [orders, setOrders] = useState<Order[]>(() => {
+    const saved = localStorage.getItem('lumina_orders');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [markets, setMarkets] = useState<Market[]>(() => {
+    const saved = localStorage.getItem('lumina_markets');
+    return saved ? JSON.parse(saved) : INITIAL_MARKETS;
+  });
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isLockdown, setIsLockdown] = useState(false);
 
-  // Load from storage for "Offline Mode" simulation
+  // Sync to Storage
   useEffect(() => {
-    const savedOrders = localStorage.getItem('lumina_orders');
-    if (savedOrders) setOrders(JSON.parse(savedOrders));
-    
-    const savedNotifications = localStorage.getItem('lumina_notifications');
-    if (savedNotifications) setNotifications(JSON.parse(savedNotifications));
-  }, []);
-
-  // Auto-sync simulation
-  useEffect(() => {
+    localStorage.setItem('lumina_users', JSON.stringify(users));
+    localStorage.setItem('lumina_products', JSON.stringify(products));
+    localStorage.setItem('lumina_branches', JSON.stringify(branches));
     localStorage.setItem('lumina_orders', JSON.stringify(orders));
-  }, [orders]);
+    localStorage.setItem('lumina_markets', JSON.stringify(markets));
+  }, [users, products, branches, orders, markets]);
 
   useEffect(() => {
-    if (isLockdown) {
-      setCurrentUser(null);
-    }
+    if (isLockdown) setCurrentUser(null);
   }, [isLockdown]);
 
-  const handleLogin = (user: User) => {
+  const handleLogin = (username: string) => {
+    const user = users.find(u => u.username === username);
+    if (!user) {
+      alert("مستخدم غير موجود");
+      return;
+    }
     if (isLockdown && user.role !== Role.ADMIN) {
-      alert("System is currently in lockdown for maintenance.");
+      alert("النظام في حالة صيانة حالياً.");
       return;
     }
     setCurrentUser(user);
   };
 
-  const handleLogout = () => {
-    setCurrentUser(null);
-  };
-
+  const handleLogout = () => setCurrentUser(null);
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const closeSidebar = () => { if (window.innerWidth < 1024) setIsSidebarOpen(false); };
 
-  const addOrder = (order: Order) => {
-    const newOrders = [...orders, order];
-    setOrders(newOrders);
-    // Audit log simulation
-    console.log(`Audit: ${order.userName} posted order ${order.id}`);
-  };
+  const addOrder = (order: Order) => setOrders(prev => [...prev, order]);
 
   const broadcastNotification = (msg: string) => {
     const newNotif: Notification = {
       id: Date.now().toString(),
       message: msg,
-      timestamp: new Date().toLocaleTimeString(),
-      from: currentUser?.displayName || 'Admin',
+      timestamp: new Date().toLocaleTimeString('ar-EG'),
+      from: currentUser?.displayName || 'المدير',
       type: 'Broadcast'
     };
     setNotifications(prev => [newNotif, ...prev]);
@@ -104,7 +109,6 @@ const App: React.FC = () => {
 
   return (
     <div className={`min-h-screen flex overflow-hidden transition-colors duration-500 ${themeClasses[theme]} ${theme === 'dark' ? 'dark' : ''}`}>
-      {/* Sidebar */}
       <Sidebar 
         isOpen={isSidebarOpen} 
         activeView={activeView} 
@@ -113,9 +117,8 @@ const App: React.FC = () => {
         onClose={closeSidebar}
       />
 
-      {/* Main Content */}
       <div 
-        className={`flex-1 flex flex-col transition-all duration-300 ${isSidebarOpen ? 'ml-0 md:ml-64' : 'ml-0'}`}
+        className={`flex-1 flex flex-col transition-all duration-300 ${isSidebarOpen ? 'mr-0 md:mr-64' : 'mr-0'}`}
         onClick={() => window.innerWidth < 1024 && isSidebarOpen && setIsSidebarOpen(false)}
       >
         <TopBar 
@@ -173,7 +176,6 @@ const App: React.FC = () => {
         </main>
       </div>
 
-      {/* Floating Chat */}
       <InternalChat 
         user={currentUser} 
         isOpen={isChatOpen} 
