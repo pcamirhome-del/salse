@@ -1,5 +1,5 @@
 {
-  "name": "Lumina Sales Pro",
+  "name": "مبيعات مهم",
   "description": "A high-end Sales Management System featuring Glassmorphism UI, real-time analytics, RBAC, and AI-driven predictive insights.",
   "requestFramePermissions": [
     "camera"
