@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { User, Role, Order, Product, Branch, Market, Notification, ChatMessage, ThemeType } from './types';
 import { INITIAL_USERS, INITIAL_PRODUCTS, INITIAL_BRANCHES, INITIAL_MARKETS } from './constants';
 import Login from './views/Login';
@@ -13,37 +13,35 @@ import InternalChat from './components/InternalChat';
 import AIChatBot from './components/AIChatBot';
 import { AnimatePresence, motion } from 'framer-motion';
 
+// وظيفة مساعدة لضمان سلامة البيانات في المتصفح
+const getSavedData = <T,>(key: string, initial: T): T => {
+  try {
+    const saved = localStorage.getItem(key);
+    return saved ? JSON.parse(saved) : initial;
+  } catch (e) {
+    return initial;
+  }
+};
+
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [theme, setTheme] = useState<ThemeType>('glassy');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeView, setActiveView] = useState<'dashboard' | 'sales' | 'admin' | 'crm' | 'chat'>('dashboard');
   
-  const [users, setUsers] = useState<User[]>(() => {
-    const saved = localStorage.getItem('lumina_users');
-    return saved ? JSON.parse(saved) : INITIAL_USERS;
-  });
-  const [products, setProducts] = useState<Product[]>(() => {
-    const saved = localStorage.getItem('lumina_products');
-    return saved ? JSON.parse(saved) : INITIAL_PRODUCTS;
-  });
-  const [branches, setBranches] = useState<Branch[]>(() => {
-    const saved = localStorage.getItem('lumina_branches');
-    return saved ? JSON.parse(saved) : INITIAL_BRANCHES;
-  });
-  const [orders, setOrders] = useState<Order[]>(() => {
-    const saved = localStorage.getItem('lumina_orders');
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [markets, setMarkets] = useState<Market[]>(() => {
-    const saved = localStorage.getItem('lumina_markets');
-    return saved ? JSON.parse(saved) : INITIAL_MARKETS;
-  });
+  // قاعدة البيانات المحلية (المستخدمين، المنتجات، الفروع، المبيعات)
+  const [users, setUsers] = useState<User[]>(() => getSavedData('lumina_users', INITIAL_USERS));
+  const [products, setProducts] = useState<Product[]>(() => getSavedData('lumina_products', INITIAL_PRODUCTS));
+  const [branches, setBranches] = useState<Branch[]>(() => getSavedData('lumina_branches', INITIAL_BRANCHES));
+  const [orders, setOrders] = useState<Order[]>(() => getSavedData('lumina_orders', []));
+  const [markets, setMarkets] = useState<Market[]>(() => getSavedData('lumina_markets', INITIAL_MARKETS));
+
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isLockdown, setIsLockdown] = useState(false);
 
+  // ترحيل البيانات للتخزين الدائم لضمان ظهورها على Vercel دائماً
   useEffect(() => {
     localStorage.setItem('lumina_users', JSON.stringify(users));
     localStorage.setItem('lumina_products', JSON.stringify(products));
@@ -59,11 +57,11 @@ const App: React.FC = () => {
   const handleLogin = (username: string) => {
     const user = users.find(u => u.username === username);
     if (!user) {
-      alert("مستخدم غير موجود");
+      alert("عذراً، اسم المستخدم هذا غير مسجل في النظام.");
       return;
     }
     if (isLockdown && user.role !== Role.ADMIN) {
-      alert("النظام في حالة صيانة حالياً.");
+      alert("النظام في وضع الصيانة حالياً. الدخول للمسؤولين فقط.");
       return;
     }
     setCurrentUser(user);
@@ -175,7 +173,6 @@ const App: React.FC = () => {
         </main>
       </div>
 
-      {/* شات الموظفين الداخلي */}
       <InternalChat 
         user={currentUser} 
         isOpen={isChatOpen} 
@@ -184,7 +181,7 @@ const App: React.FC = () => {
         setMessages={setChatMessages}
       />
 
-      {/* المساعد الذكي AI - مطلع على كامل البيانات */}
+      {/* المساعد الذكي AI - مطلع على كامل البيانات المحلية */}
       <AIChatBot 
         user={currentUser}
         data={{

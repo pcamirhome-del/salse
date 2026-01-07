@@ -46,10 +46,10 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
 
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 mb-4 border border-white/20">
-            <i className="fas fa-lock text-white text-2xl"></i>
+            <i className="fas fa-shield-halved text-white text-2xl"></i>
           </div>
-          <h2 className="text-3xl font-bold text-white tracking-tight">الدخول للنظام</h2>
-          <p className="text-white/60 mt-2">أدخل بياناتك للوصول إلى لومينا برو</p>
+          <h2 className="text-3xl font-bold text-white tracking-tight">نظام لومينا برو</h2>
+          <p className="text-white/60 mt-2">تسجيل الدخول الآمن للموظفين والمديرين</p>
         </div>
 
         <form onSubmit={handleLoginSubmit} className="space-y-6">
@@ -74,7 +74,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
             <label className="text-sm font-medium text-white/80 mr-1 block">كلمة المرور</label>
             <div className="relative group">
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 group-focus-within:text-indigo-400 transition-colors">
-                <i className="fas fa-key"></i>
+                <i className="fas fa-lock"></i>
               </span>
               <input 
                 type="password" 
@@ -91,14 +91,14 @@ const Login: React.FC<LoginProps> = ({ onLogin, users }) => {
             type="submit" 
             className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/20 transform active:scale-[0.98] transition-all"
           >
-            تسجيل الدخول
+            دخول النظام
           </button>
         </form>
 
         <div className="mt-8 pt-6 border-t border-white/10 text-center">
-          <p className="text-white/40 text-sm italic">
-            <i className="fas fa-shield-alt ml-2"></i>
-            إنشاء الحسابات متاح فقط من خلال لوحة الإدارة
+          <p className="text-white/40 text-xs">
+            <i className="fas fa-info-circle ml-2"></i>
+            حسابات الموظفين تدار بواسطة الإدارة العليا فقط.
           </p>
         </div>
       </div>
