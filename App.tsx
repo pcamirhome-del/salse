@@ -10,6 +10,7 @@ import CRM from './views/CRM';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
 import InternalChat from './components/InternalChat';
+import AIChatBot from './components/AIChatBot';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const App: React.FC = () => {
@@ -18,7 +19,6 @@ const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [activeView, setActiveView] = useState<'dashboard' | 'sales' | 'admin' | 'crm' | 'chat'>('dashboard');
   
-  // App State with LocalStorage persistence
   const [users, setUsers] = useState<User[]>(() => {
     const saved = localStorage.getItem('lumina_users');
     return saved ? JSON.parse(saved) : INITIAL_USERS;
@@ -44,7 +44,6 @@ const App: React.FC = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isLockdown, setIsLockdown] = useState(false);
 
-  // Sync to Storage
   useEffect(() => {
     localStorage.setItem('lumina_users', JSON.stringify(users));
     localStorage.setItem('lumina_products', JSON.stringify(products));
@@ -176,12 +175,25 @@ const App: React.FC = () => {
         </main>
       </div>
 
+      {/* شات الموظفين الداخلي */}
       <InternalChat 
         user={currentUser} 
         isOpen={isChatOpen} 
         setIsOpen={setIsChatOpen}
         messages={chatMessages}
         setMessages={setChatMessages}
+      />
+
+      {/* المساعد الذكي AI - مطلع على كامل البيانات */}
+      <AIChatBot 
+        user={currentUser}
+        data={{
+          products,
+          orders,
+          branches,
+          users,
+          totalSales: orders.reduce((sum, o) => sum + o.totalValue, 0)
+        }}
       />
     </div>
   );
